@@ -1,4 +1,5 @@
 import httpx
+import logging
 from fuzzywuzzy import process
 from mcp.server.fastmcp import FastMCP
 
@@ -25,7 +26,9 @@ def _build_search_mappings():
     ALL_NAMES_TO_SEARCH = list(names_set)
     NAME_TO_LOCATION_MAP = temp_map
 
-    print(f"[Init] Alias mappings built with {len(ALL_NAMES_TO_SEARCH)} unique names.")
+    logging.info(
+        f"[Init] Alias mappings built with {len(ALL_NAMES_TO_SEARCH)} unique names."
+    )
 
 
 def find_best_match(query: str, threshold: int = 70) -> KnownLocation | None:
@@ -52,12 +55,12 @@ async def find_bikes(query: str) -> LocatorResponse:
     :rtype: LocatorResponse
     """
 
-    print(f"[Tool] Received query: {query}")
+    logging.info(f"[4ma] Received query: {query}")
     matched_location = find_best_match(query)
 
     if not matched_location:
         message = f"No matching location found for query: '{query}'"
-        print(f"[Tool] {message}")
+        logging.warning(f"[4ma] {message}")
         return LocatorResponse(
             query=query,
             match_found=False,
@@ -67,7 +70,7 @@ async def find_bikes(query: str) -> LocatorResponse:
         )
 
     primary_name = matched_location.name
-    print(f"[Tool] Matched location: {query} -> {primary_name}")
+    logging.info(f"[4ma] Matched location: {query} -> {primary_name}")
 
     resp = await httpx.AsyncClient().get(
         "https://newmapi.7mate.cn/api/new/surrounding/car",
@@ -82,7 +85,7 @@ async def find_bikes(query: str) -> LocatorResponse:
         )
     except Exception as e:
         message = f"Error parsing bike API data: {e}"
-        print(f"[Tool] {message}")
+        logging.exception(f"[4ma] {message}")
         return LocatorResponse(
             query=query,
             match_found=True,
@@ -92,7 +95,7 @@ async def find_bikes(query: str) -> LocatorResponse:
         )
 
     message = f"Found {bikes_data.total} bikes near {primary_name}."
-    print(f"[Tool] {message}")
+    logging.info(f"[4ma] {message}")
 
     return LocatorResponse(
         query=query,
