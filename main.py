@@ -47,12 +47,9 @@ NAME_TO_LOCATION_MAP: dict[str, KnownLocation] = {}
 @mcp.tool()
 async def find_bikes(query: str) -> LocatorResponse:
     """
-    Find nearby bikes based on a location query.
-
-    :param query: The location query string
-    :type query: str
-    :return: LocatorResponse containing the results
-    :rtype: LocatorResponse
+    根据用户给出的地点名称，查找周围的共享单车信息。
+    Args:
+        query (str): 用户输入的地点名称或别名。
     """
 
     logging.info(f"[4ma] Received query: {query}")
